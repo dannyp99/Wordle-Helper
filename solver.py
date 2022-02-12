@@ -1,5 +1,10 @@
+import sys;
+
 def main():
     guesses = 0;
+    debug = False;
+    if len(sys.argv) > 1 and sys.argv[1] == 'debug':
+        debug = True;
     with open('words.txt') as f:
         ALL_WORDS = {w.strip() : True for w in f.readlines()};
     repeat = 'y'
@@ -11,22 +16,29 @@ def main():
             print("The word is:", user_word + "!")
             exit()
         for i in range(5):
-            #print("Looking at letter:", user_word[i])
+            if debug:
+                print("Looking at letter:", user_word[i])
             for word in ALL_WORDS.keys():
                 if (ALL_WORDS[word]):
                     if correctness[i] == '_' and user_word[i] in word:
-                        #print("Removing:", word, "invalid letter:", user_word[i])
+                        if debug:
+                            print("Removing:", word, "invalid letter:", user_word[i])
                         ALL_WORDS[word] = False;
+                        for j in range(5-i):
+                            if correctness[j] == '!' and user_word[i] == user_word[j]:
+                                ALL_WORDS[word] = True;
                         continue;
-                    elif correctness[i] == '!' and (user_word[i] != word[i] or user_word[i] not in word):
-                        #print("Removing:", word, "missing correct letter:", user_word[i])
+                    elif correctness[i] == '!' and (user_word[i] != word[i] and user_word[i] not in word[i:]):
+                        if debug:
+                            print("Removing:", word, "missing correct letter:", user_word[i])
                         ALL_WORDS[word] = False;
-                        continue;
+                        continue
                     elif correctness[i] == '?' and (user_word[i] not in word or user_word[i] == word[i]):
-                        #print("Removing:", word, "missing correct letter or in wrong postition:", user_word[i])
+                        if debug:
+                            print("Removing:", word, "missing correct letter or in wrong postition:", user_word[i])
                         ALL_WORDS[word] = False;
                         continue;
-        print("Valid Words: ", end="")
+        print("Valid Word(s): ", end="")
         for x in ALL_WORDS.keys():
             if ALL_WORDS[x]:
                 print(x, end=" ")
