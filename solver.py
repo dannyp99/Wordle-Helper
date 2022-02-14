@@ -28,7 +28,7 @@ def main():
                             if correctness[j] == '!' and user_word[i] == user_word[j]:
                                 ALL_WORDS[word] = True;
                         continue;
-                    elif correctness[i] == '!' and (user_word[i] != word[i] and user_word[i] not in word[i:]):
+                    elif correctness[i] == '!' and user_word[i] != word[i]:
                         if debug:
                             print("Removing:", word, "missing correct letter:", user_word[i])
                         ALL_WORDS[word] = False;
