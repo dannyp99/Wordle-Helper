@@ -1,5 +1,12 @@
 import sys;
 
+def getFreq(char, word):
+    count = 0;
+    for letter in word:
+        if char == letter:
+            count += 1;
+    return count;
+
 def main():
     guesses = 0;
     debug = False;
@@ -37,17 +44,23 @@ def main():
                             print("Removing:", word, "missing correct letter:", user_word[i])
                         ALL_WORDS[word] = False;
                         continue;
-                    elif correctness[i] == '?' and (user_word[i] not in word or user_word[i] == word[i]):
-                        if debug:
-                            print("Removing:", word, "missing correct letter or in wrong postition:", user_word[i]);
-                        ALL_WORDS[word] = False;
-                        continue;
                     elif correctness[i] == '?':
-                        for j in range(5):
-                            if i != j and user_word[i] == user_word[j]:
-                                if correctness[j] == '!':
-                                    ALL_WORDS[word] = word[i] != user_word[i] and (user_word[i] in word[j+1:] or user_word[i] in word[:j]);
-                                    continue;
+                        if user_word[i] not in word or user_word[i] == word[i]:
+                            if debug:
+                                print("Removing:", word, "missing correct letter or in wrong postition:", user_word[i]);
+                            ALL_WORDS[word] = False;
+                            continue;
+                        else:
+                            for j in range(5):
+                                if i != j and user_word[i] == user_word[j]:
+                                    if correctness[j] == '!':
+                                        ALL_WORDS[word] = word[i] != user_word[i] and (user_word[i] in word[j+1:] or user_word[i] in word[:j]);
+                                        continue;
+                                    if correctness[j] == '?':
+                                        word_freq = getFreq(user_word[i], word);
+                                        user_freq = getFreq(user_word[i], user_word);
+                                        ALL_WORDS[word] = word[i] != user_word[i] and word[j] != user_word[i] and(word_freq == user_freq);
+                                        continue;
         counter = 0;
         valid_words = []
         for k,v in ALL_WORDS.items():
