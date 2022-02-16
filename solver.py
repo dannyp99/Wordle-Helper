@@ -24,25 +24,30 @@ def main():
                         if debug:
                             print("Removing:", word, "invalid letter:", user_word[i])
                         ALL_WORDS[word] = False;
-                        for j in range(i+1, 5):
-                            if correctness[j] == '!' and user_word[i] == user_word[j]:
-                                ALL_WORDS[word] = True;
-                        continue;
+                        for j in range(5):
+                            if i != j and user_word[i] == user_word[j]:
+                                if correctness[j] == '!':
+                                    ALL_WORDS[word] = word[j] == user_word[i];
+                                    continue;
+                                elif correctness[j] == '?':
+                                    ALL_WORDS[word] = word[j] != user_word[i] and (user_word[i] in word[i+1:] or user_word[i] in word[:i]);
+                                    continue;
                     elif correctness[i] == '!' and user_word[i] != word[i]:
                         if debug:
                             print("Removing:", word, "missing correct letter:", user_word[i])
                         ALL_WORDS[word] = False;
-                        continue
+                        continue;
                     elif correctness[i] == '?' and (user_word[i] not in word or user_word[i] == word[i]):
                         if debug:
                             print("Removing:", word, "missing correct letter or in wrong postition:", user_word[i]);
                         ALL_WORDS[word] = False;
                         continue;
                     elif correctness[i] == '?':
-                        for j in range(i+1, 5):
-                            if correctness[j] == '!' and user_word[i] == user_word[j]:
-                                if user_word[i] not in word[:j]:
-                                    ALL_WORDS[word] = False;
+                        for j in range(5):
+                            if i != j and user_word[i] == user_word[j]:
+                                if correctness[j] == '!':
+                                    ALL_WORDS[word] = word[i] != user_word[i] and (user_word[i] in word[j+1:] or user_word[i] in word[:j]);
+                                    continue;
         counter = 0;
         valid_words = []
         for k,v in ALL_WORDS.items():
