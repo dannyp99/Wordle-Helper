@@ -34,7 +34,7 @@ def main():
                         for j in range(5):
                             if i != j and user_word[i] == user_word[j]:
                                 if correctness[j] == '!':
-                                    ALL_WORDS[word] = word[j] == user_word[i];
+                                    ALL_WORDS[word] = word[j] == user_word[i] and (user_word[i] not in word[j+1:] and user_word[i] not in word[:j]);
                                     continue;
                                 elif correctness[j] == '?':
                                     ALL_WORDS[word] = word[j] != user_word[i] and (user_word[i] in word[i+1:] or user_word[i] in word[:i]);
@@ -54,7 +54,7 @@ def main():
                             for j in range(5):
                                 if i != j and user_word[i] == user_word[j]:
                                     if correctness[j] == '!':
-                                        ALL_WORDS[word] = word[i] != user_word[i] and (user_word[i] in word[j+1:] or user_word[i] in word[:j]);
+                                        ALL_WORDS[word] = (word[i] != user_word[i] and word[j] == user_word[i]) and (user_word[i] in word[j+1:] or user_word[i] in word[:j]);
                                         continue;
                                     if correctness[j] == '?':
                                         word_freq = getFreq(user_word[i], word);
