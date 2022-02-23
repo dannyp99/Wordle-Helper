@@ -17,7 +17,7 @@ def main():
     repeat = 'y';
     while (repeat != 'n'):
         print('You have {:d} guesses remaining'.format(6 - guesses));
-        user_word = input("Enter your 5 letter word: ").strip();
+        user_word = input("Enter your 5 letter word: ").strip().lower();
         correctness = input("Enter _ for not in word, ! for correct spot and ? if in wrong position: ").strip();
         if (correctness == "!!!!!"):
             print("The word is:", user_word + "!");
