@@ -7,10 +7,20 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 )
 
 var all_words map[string] bool = make(map[string]bool)
 var debug_logger *log.Logger
+
+
+func track(msg string, ) (string, time.Time){
+    return msg, time.Now()
+}
+
+func duration(msg string, start time.Time) {
+    log.Printf("%v: %v\n", msg, time.Since(start))
+}
 
 func get_freq(character string, word string) int {
     counter := 0
@@ -52,34 +62,35 @@ func filter(word_map map[string] bool) map[string] bool {
 }
 
 func answer_generator(user_word string, correctness string) {
+    defer duration(track("answer_generator"))
     for i := range 5 {
         checking_char := string(user_word[i])
-        debug_logger.Printf("Loooking at letter %s\n", checking_char)
+        //debug_logger.Printf("Loooking at letter %s\n", checking_char)
         for word := range all_words {
             if string(correctness[i]) == "_" && strings.Contains(word, checking_char) {
-                debug_logger.Printf("Removing %s invalid letter: %s\n", word, checking_char)
+                //debug_logger.Printf("Removing %s invalid letter: %s\n", word, checking_char)
                 all_words[word] = false
                 for j := range 5 {
                     correctness_char := string(correctness[j])
                     if i != j && checking_char == string(user_word[j]) {
                         if correctness_char == "!" {
                             all_words[word] = string(word[j]) == checking_char && (!strings.Contains(word[j+1:], checking_char) && !strings.Contains(word[:j], checking_char))
-                            debug_logger.Println(word, "is:", all_words[word])
+                            //debug_logger.Println(word, "is:", all_words[word])
                             continue
                         } else if correctness_char == "?" {
                             all_words[word] = string(word[j]) != checking_char && (strings.Contains(word[i+1:], checking_char) || strings.Contains(word[:i], checking_char))
-                            debug_logger.Println(word, "is:", all_words[word])
+                            //debug_logger.Println(word, "is:", all_words[word])
                             continue
                         }
                     }
                 }
             } else if string(correctness[i]) == "!" && checking_char != string(word[i]) {
-                debug_logger.Printf("Removing %s missing correct letter: %s\n", word, checking_char)
+                //debug_logger.Printf("Removing %s missing correct letter: %s\n", word, checking_char)
                 all_words[word] = false
                 continue
             } else if string(correctness[i]) == "?" { // ? case
                 if !strings.Contains(word, checking_char) || checking_char == string(word[i]) {
-                    debug_logger.Printf("Removing: %s missing correct letter or in wrong postition: %s\n", word, checking_char)
+                    //debug_logger.Printf("Removing: %s missing correct letter or in wrong postition: %s\n", word, checking_char)
                     all_words[word] = false
                     continue
                 } else {
@@ -88,15 +99,15 @@ func answer_generator(user_word string, correctness string) {
                         correctness_char = string(correctness[j])
                         if i != j && checking_char == string(user_word[j]) {
                             if correctness_char == "!" {
-                                debug_logger.Printf("split char: %s, contains true? %t", word[:j], strings.Contains(word[:j], checking_char))
+                                //debug_logger.Printf("split char: %s, contains true? %t", word[:j], strings.Contains(word[:j], checking_char))
                                 all_words[word] = (string(word[i]) != checking_char && string(word[j]) == checking_char) && (strings.Contains(word[j+1:], checking_char) || strings.Contains(word[:j], checking_char))
-                                debug_logger.Println(word, "is:", all_words[word])
+                                //debug_logger.Println(word, "is:", all_words[word])
                                 continue
                             } else if correctness_char == "?" {
                                 word_freq := get_freq(checking_char, word)
                                 user_freq := get_freq(checking_char, user_word)
                                 all_words[word] = string(word[i]) != checking_char && string(word[j]) != checking_char && (word_freq == user_freq)
-                                debug_logger.Println(word, "is:", all_words[word])
+                                //debug_logger.Println(word, "is:", all_words[word])
                                 continue
                             }
                         }
@@ -110,22 +121,13 @@ func answer_generator(user_word string, correctness string) {
 func main() {
     reader := bufio.NewReader(os.Stdin)
     guesses := 0
-    var argv []string = os.Args
-    if len(argv) > 1 && strings.ToLower(argv[1]) == "debug" {
-        debug_logger = log.New(os.Stdout, "DEBUG: ", log.Ldate|log.Ltime|log.Lshortfile)
-    } else {
-        debug_file, err := os.OpenFile("go-logs.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-        if err != nil {
-            log.Fatal(err)
-        }
-        debug_logger = log.New(debug_file, "DEBUG: ", log.Ldate|log.Ltime|log.Lshortfile)
+    debug_file, err := os.OpenFile("go-logs.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+    if err != nil {
+        log.Fatal(err)
     }
+    debug_logger = log.New(debug_file, "DEBUG: ", log.Ldate|log.Ltime|log.Lshortfile)
 
     load_word_list()
-    //for k := range all_words {
-    //    delete(all_words, k)
-    //}
-    //all_words["arles"] = true
 
     repeat := "y"
     for guesses <= 6 && repeat != "n" {

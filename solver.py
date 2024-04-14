@@ -1,5 +1,6 @@
 import sys
 import logging
+import time
 
 
 def getFreq(char, word):
@@ -68,7 +69,12 @@ def main():
             print("The word is:", user_word + "!")
             exit(0)
 
+        #start = time.time()
         answer_generator(user_word, correctness)
+        #end = time.time()
+
+        #diff = (end - start) * 1000
+        #print("Execution time:", diff, "milliseconds")
 
         ALL_WORDS = dict(filter(lambda entry: entry[1], ALL_WORDS.items()))
         valid_word_count = len(ALL_WORDS.keys())
