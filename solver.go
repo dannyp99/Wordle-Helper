@@ -14,7 +14,7 @@ var all_words map[string] bool = make(map[string]bool)
 var debug_logger *log.Logger
 
 
-func track(msg string, ) (string, time.Time){
+func track(msg string) (string, time.Time){
     return msg, time.Now()
 }
 
@@ -65,48 +65,56 @@ func answer_generator(user_word string, correctness string) {
     defer duration(track("answer_generator"))
     for i := range 5 {
         checking_char := string(user_word[i])
+        current_correct := string(correctness[i])
+        var word_char string
         //debug_logger.Printf("Loooking at letter %s\n", checking_char)
         for word := range all_words {
-            if string(correctness[i]) == "_" && strings.Contains(word, checking_char) {
+            word_char = string(word[i])
+            if current_correct == "_" && strings.Contains(word, checking_char) {
                 //debug_logger.Printf("Removing %s invalid letter: %s\n", word, checking_char)
                 all_words[word] = false
+                var correctness_char string
+                var other_char string
                 for j := range 5 {
-                    correctness_char := string(correctness[j])
+                    other_char = string(word[j])
+                    correctness_char = string(correctness[j])
                     if i != j && checking_char == string(user_word[j]) {
                         if correctness_char == "!" {
-                            all_words[word] = string(word[j]) == checking_char && (!strings.Contains(word[j+1:], checking_char) && !strings.Contains(word[:j], checking_char))
+                            all_words[word] = other_char == checking_char && (!strings.Contains(word[j+1:], checking_char) && !strings.Contains(word[:j], checking_char))
                             //debug_logger.Println(word, "is:", all_words[word])
                             continue
                         } else if correctness_char == "?" {
-                            all_words[word] = string(word[j]) != checking_char && (strings.Contains(word[i+1:], checking_char) || strings.Contains(word[:i], checking_char))
+                            all_words[word] = other_char != checking_char && (strings.Contains(word[i+1:], checking_char) || strings.Contains(word[:i], checking_char))
                             //debug_logger.Println(word, "is:", all_words[word])
                             continue
                         }
                     }
                 }
-            } else if string(correctness[i]) == "!" && checking_char != string(word[i]) {
+            } else if current_correct == "!" && checking_char != word_char {
                 //debug_logger.Printf("Removing %s missing correct letter: %s\n", word, checking_char)
                 all_words[word] = false
                 continue
-            } else if string(correctness[i]) == "?" { // ? case
-                if !strings.Contains(word, checking_char) || checking_char == string(word[i]) {
+            } else if current_correct == "?" { // ? case
+                if !strings.Contains(word, checking_char) || checking_char == word_char {
                     //debug_logger.Printf("Removing: %s missing correct letter or in wrong postition: %s\n", word, checking_char)
                     all_words[word] = false
                     continue
                 } else {
                     var correctness_char string
+                    var other_char string
                     for j := range 5 {
+                        other_char = string(word[j])
                         correctness_char = string(correctness[j])
                         if i != j && checking_char == string(user_word[j]) {
                             if correctness_char == "!" {
                                 //debug_logger.Printf("split char: %s, contains true? %t", word[:j], strings.Contains(word[:j], checking_char))
-                                all_words[word] = (string(word[i]) != checking_char && string(word[j]) == checking_char) && (strings.Contains(word[j+1:], checking_char) || strings.Contains(word[:j], checking_char))
+                                all_words[word] = (word_char != checking_char && string(other_char) == checking_char) && (strings.Contains(word[j+1:], checking_char) || strings.Contains(word[:j], checking_char))
                                 //debug_logger.Println(word, "is:", all_words[word])
                                 continue
                             } else if correctness_char == "?" {
                                 word_freq := get_freq(checking_char, word)
                                 user_freq := get_freq(checking_char, user_word)
-                                all_words[word] = string(word[i]) != checking_char && string(word[j]) != checking_char && (word_freq == user_freq)
+                                all_words[word] = word_char != checking_char && string(other_char) != checking_char && (word_freq == user_freq)
                                 //debug_logger.Println(word, "is:", all_words[word])
                                 continue
                             }
@@ -144,8 +152,8 @@ func main() {
         }
 
         answer_generator(cleaned_user_word, cleaned_correctness)
-
         all_words = filter(all_words) 
+        
         valid_word_count := len(all_words)
         if valid_word_count > 1 {
             keys := make([]string, 0, len(all_words))
