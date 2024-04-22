@@ -20,3 +20,7 @@ Example:
 
 
 **NOTE:** The list was borrowed from a similar project that also suggests answers. Feel free to check out the following [repository](https://github.com/mattdodge/wordle_bot)
+
+## Go Version
+
+Works the same, be sure to have go installed from [here](https://go.dev/dl/)
